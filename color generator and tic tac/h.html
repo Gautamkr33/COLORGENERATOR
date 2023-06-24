@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Color Generator & Tic Tac Toe</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f8f1e7; /* Light cream golden */
+    }
+    
+    .header {
+      text-align: center;
+      background-color: #333;
+      color: #fff;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .container {
+      text-align: center;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+      max-width: 400px;
+      width: 90%;
+    }
+    
+    h1 {
+      margin-top: 0;
+    }
+    
+    .color-box {
+      width: 200px;
+      height: 200px;
+      margin: 20px auto;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+      transition: background-color 0.3s ease;
+    }
+    
+    .color-buttons {
+      margin-top: 20px;
+    }
+    
+    .color-buttons button {
+      background-color: #333;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-right: 10px;
+    }
+    
+    .color-buttons button:hover {
+      background-color: #555;
+    }
+    
+    .color-code {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #555;
+    }
+    
+    .board {
+      display: flex;
+      flex-wrap: wrap;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+    
+    .cell {
+      width: 100px;
+      height: 100px;
+      border: 1px solid #ccc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 48px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    
+    .cell:hover {
+      background-color: #f5f5f5;
+    }
+    
+    .message {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #555;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    
+    .message.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Color Generator & Tic Tac Toe</h1>
+  </div>
+  
+  <div class="container">
+    <div class="color-box"></div>
+    <div class="color-buttons">
+      <button onclick="generateColor()">Generate Color</button>
+      <button onclick="generateColorCombination()">Generate Combination</button>
+    </div>
+    <p class="color-code" id="colorCode">#FFFFFF</p>
+    
+    <button onclick="playGame()">Play Game</button>
+    <div class="board"></div>
+    <p class="message" id="message"></p>
+  </div>
+
+  <script>
+    var board = document.querySelector('.board');
+    var cells = [];
+    var currentPlayer = 'X';
+    var gameOver = false;
+    
+    function generateColor() {
+      var color = getRandomColor();
+      var colorBox = document.querySelector('.color-box');
+      colorBox.style.backgroundColor = color;
+      colorBox.style.animation = 'fadeIn 0.3s ease';
+      document.getElementById('colorCode').textContent = color;
+    }
+    
+    function generateColorCombination() {
+      var color1 = getRandomColor();
+      var color2 = getRandomColor();
+      var colorBox = document.querySelector('.color-box');
+      
+      colorBox.style.background = `linear-gradient(to right, ${color1}, ${color2})`;
+      colorBox.style.animation = 'fadeIn 0.3s ease';
+      document.getElementById('colorCode').textContent = `${color1} - ${color2}`;
+    }
+    
+    function getRandomColor() {
+      var letters = '0123456789ABCDEF';
+      var color = '#';
+      
+      for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      
+      return color;
+    }
+    
+    function playGame() {
+      board.innerHTML = '';
+      cells = [];
+      currentPlayer = 'X';
+      gameOver = false;
+      
+      for (var i = 0; i < 9; i++) {
+        var cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.addEventListener('click', cellClicked);
+        board.appendChild(cell);
+        cells.push(cell);
+      }
+      
+      document.getElementById('message').textContent = "It's Player X's turn";
+      document.getElementById('message').classList.remove('show');
+    }
+    
+    function cellClicked(e) {
+      if (gameOver) return;
+      
+      var cell = e.target;
+      
+      if (cell.textContent !== '') return;
+      
+      cell.textContent = currentPlayer;
+      cell.style.color = currentPlayer === 'X' ? '#FF4136' : '#0074D9';
+      cell.style.animation = 'fadeIn 0.3s ease';
+      
+      if (checkWin()) {
+        gameOver = true;
+        document.getElementById('message').textContent = `Player ${currentPlayer} wins!`;
+        document.getElementById('message').classList.add('show');
+        return;
+      }
+      
+      if (checkDraw()) {
+        gameOver = true;
+        document.getElementById('message').textContent = "It's a draw!";
+        document.getElementById('message').classList.add('show');
+        return;
+      }
+      
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+      document.getElementById('message').textContent = `It's Player ${currentPlayer}'s turn`;
+      document.getElementById('message').classList.remove('show');
+      
+      if (currentPlayer === 'O') {
+        makeComputerMove();
+      }
+    }
+    
+    function checkWin() {
+      var winningCombinations = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+        [0, 4, 8], [2, 4, 6] // Diagonals
+      ];
+      
+      for (var i = 0; i < winningCombinations.length; i++) {
+        var [a, b, c] = winningCombinations[i];
+        if (cells[a].textContent === currentPlayer &&
+            cells[b].textContent === currentPlayer &&
+            cells[c].textContent === currentPlayer) {
+          cells[a].style.backgroundColor = '#FFDC00'; // Highlight winning cells
+          cells[b].style.backgroundColor = '#FFDC00';
+          cells[c].style.backgroundColor = '#FFDC00';
+          return true;
+        }
+      }
+      
+      return false;
+    }
+    
+    function checkDraw() {
+      for (var i = 0; i < cells.length; i++) {
+        if (cells[i].textContent === '') {
+          return false;
+        }
+      }
+      
+      return true;
+    }
+    
+    function makeComputerMove() {
+      var availableCells = [];
+      
+      for (var i = 0; i < cells.length; i++) {
+        if (cells[i].textContent === '') {
+          availableCells.push(i);
+        }
+      }
+      
+      if (availableCells.length > 0) {
+        var randomIndex = Math.floor(Math.random() * availableCells.length);
+        var randomCellIndex = availableCells[randomIndex];
+        setTimeout(function() {
+          cells[randomCellIndex].click();
+        }, 800);
+      }
+    }
+  </script>
+</body>
+</html>
